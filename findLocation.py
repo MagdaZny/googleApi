@@ -4,7 +4,7 @@ from key import key
 app = Flask(__name__, template_folder='template')
 
 search_url="https://maps.googleapis.com/maps/api/place/textsearch/json"
-details_urn = "https://maps.googleapis.com/maps/api/place/details/json"
+details_url = "https://maps.googleapis.com/maps/api/place/details/json"
 
 @app.route("/", methods=["GET"])
 def retreive():
@@ -12,8 +12,17 @@ def retreive():
 
 @app.route("/sendRequest/<string:query>")
 def results(query):
+	search_payload = {"key": key, "query":query}
+	search_req = requests.get(search_url, params=search_payload)
+	search_json = search_req.json()
+
+	place_id = search_json["results"][0]["place_id"]
 	
-	url = "https://www.google.com"
+	details_payload = {"key":key, "placeid":place_id}
+	details_resp = requests.get(details_url, params= details_payload)
+	details_json = details_resp.json()
+
+	url = details_json["result"]["url"]
 	return jsonify({'result' : url})
 
 if __name__ == "__main__":
